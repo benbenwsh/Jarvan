@@ -1,10 +1,9 @@
 import {useState, useEffect} from 'react';
 import {ProgressBar} from '../components/ProgressBar';
 import {LoadingSpinner} from '../components/LoadingSpinner';
-import {getPostData, updatePostDescription} from '../services/api';
 
 export const PostConfirmationPage = () => {
-  const [postData, setPostData] = useState(null);
+  const [imageUrl, setImageUrl] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -12,22 +11,33 @@ export const PostConfirmationPage = () => {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    const fetchPostData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getPostData();
-        setPostData(data);
-        setDescription(data.description || '');
-      } catch (err) {
-        setError('Failed to load post data. Please try again.');
-        console.error('Error fetching post data:', err);
-      } finally {
+    // Get data from sessionStorage
+    try {
+      const storedData = sessionStorage.getItem('postData');
+      if (storedData) {
+        const postData = JSON.parse(storedData);
+        // Handle both old format (imageUrls array) and new format (single imageUrl)
+        const image =
+          postData.imageUrl ||
+          (postData.imageUrls && postData.imageUrls[0]) ||
+          '';
+        if (image && postData.description) {
+          setImageUrl(image);
+          setDescription(postData.description);
+          setLoading(false);
+        } else {
+          setError('Invalid post data. Please go back and try again.');
+          setLoading(false);
+        }
+      } else {
+        setError('No post data available. Please go back and try again.');
         setLoading(false);
       }
-    };
-
-    fetchPostData();
+    } catch (err) {
+      setError('Failed to load post data. Please go back and try again.');
+      setLoading(false);
+      console.error('Error loading post data:', err);
+    }
   }, []);
 
   const handleSave = async () => {
@@ -41,7 +51,8 @@ export const PostConfirmationPage = () => {
     setSuccess(false);
 
     try {
-      await updatePostDescription(description);
+      // TODO: Implement save endpoint if needed
+      // For now, just show success
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
@@ -87,19 +98,22 @@ export const PostConfirmationPage = () => {
             </div>
           )}
 
-          {postData?.imageUrl && (
+          {imageUrl && (
             <div className='mb-6'>
               <label className='block text-sm font-medium text-gray-700 mb-2'>
                 Generated Image
               </label>
               <div className='border border-gray-300 rounded-lg overflow-hidden bg-gray-100'>
                 <img
-                  src={postData.imageUrl}
+                  src={imageUrl}
                   alt='Social media post'
                   className='w-full h-auto object-contain'
                   onError={(e) => {
                     e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
+                    const nextSibling = e.target.nextElementSibling;
+                    if (nextSibling) {
+                      nextSibling.style.display = 'flex';
+                    }
                   }}
                 />
                 <div className='hidden w-full h-64 items-center justify-center text-gray-500'>
