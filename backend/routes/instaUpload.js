@@ -1,10 +1,16 @@
 import express from 'express';
 import FormData from 'form-data';
 import fetch from 'node-fetch';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const router = express.Router();
 
+
+// LMAO 
 const N8N_WEBHOOK_URL = process.env.INSTA_POST_URL;
+console.log(N8N_WEBHOOK_URL);
 
 /**
  * POST /api/instagramUpload
