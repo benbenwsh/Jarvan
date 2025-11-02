@@ -148,21 +148,26 @@ export const InputPage = () => {
   const isDisabled = hasCompany || statusLoading;
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4'>
+    <div className='min-h-screen bg-white py-12 px-4'>
       <div className='max-w-4xl mx-auto'>
+        {/* Header */}
+        <div className='mb-8'>
+          <h1 className='text-2xl font-bold text-gray-900 mb-2'>Jarvan</h1>
+        </div>
+
         <ProgressBar progress={50} />
 
-        <div className='bg-white rounded-xl shadow-lg p-8'>
-          <h1 className='text-3xl font-bold text-gray-800 mb-2'>
+        <div className='bg-white border border-gray-200 rounded-lg p-8'>
+          <h2 className='text-3xl font-bold text-gray-900 mb-2'>
             Startup Idea Validation
-          </h1>
+          </h2>
           <p className='text-gray-600 mb-8'>
             Enter your business pitch to generate interview questions
           </p>
 
           {hasCompany && (
-            <div className='mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg'>
-              <p className='text-yellow-800'>
+            <div className='mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded'>
+              <p className='text-yellow-800 font-medium'>
                 A company has already been registered. Input is disabled.
               </p>
             </div>
@@ -171,7 +176,7 @@ export const InputPage = () => {
           <div className='mb-6'>
             <label
               htmlFor='name'
-              className='block text-sm font-medium text-gray-700 mb-2'>
+              className='block text-sm font-semibold text-gray-900 mb-2'>
               Name
             </label>
             <input
@@ -181,8 +186,8 @@ export const InputPage = () => {
               onChange={(e) => setName(e.target.value)}
               disabled={isDisabled}
               placeholder='Enter your full name'
-              className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                isDisabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'
+              className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a4c6d7] focus:border-transparent ${
+                isDisabled ? 'bg-gray-50 cursor-not-allowed text-gray-500' : 'bg-white'
               }`}
             />
           </div>
@@ -190,7 +195,7 @@ export const InputPage = () => {
           <div className='mb-6'>
             <label
               htmlFor='email'
-              className='block text-sm font-medium text-gray-700 mb-2'>
+              className='block text-sm font-semibold text-gray-900 mb-2'>
               Email
             </label>
             <input
@@ -200,8 +205,8 @@ export const InputPage = () => {
               onChange={(e) => setEmail(e.target.value)}
               disabled={isDisabled}
               placeholder='Enter your email address'
-              className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                isDisabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'
+              className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a4c6d7] focus:border-transparent ${
+                isDisabled ? 'bg-gray-50 cursor-not-allowed text-gray-500' : 'bg-white'
               }`}
             />
           </div>
@@ -209,7 +214,7 @@ export const InputPage = () => {
           <div className='mb-6'>
             <label
               htmlFor='pitch'
-              className='block text-sm font-medium text-gray-700 mb-2'>
+              className='block text-sm font-semibold text-gray-900 mb-2'>
               Business Pitch
             </label>
             <textarea
@@ -218,16 +223,16 @@ export const InputPage = () => {
               onChange={(e) => setPitch(e.target.value)}
               disabled={isDisabled}
               placeholder='Describe your startup idea, target market, and value proposition...'
-              className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none ${
-                isDisabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'
+              className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a4c6d7] focus:border-transparent resize-none ${
+                isDisabled ? 'bg-gray-50 cursor-not-allowed text-gray-500' : 'bg-white'
               }`}
               rows={8}
             />
           </div>
 
           {error && (
-            <div className='mb-4 p-4 bg-red-50 border border-red-200 rounded-lg'>
-              <p className='text-red-800 text-sm'>{error}</p>
+            <div className='mb-4 p-4 bg-red-50 border-l-4 border-red-500 rounded'>
+              <p className='text-red-800 text-sm font-medium'>{error}</p>
             </div>
           )}
 
@@ -236,8 +241,8 @@ export const InputPage = () => {
             disabled={isDisabled || isGenerating}
             className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors ${
               isDisabled || isGenerating
-                ? 'bg-gray-400 cursor-not-allowed text-white'
-                : 'bg-blue-600 hover:bg-blue-700 text-white'
+                ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+                : 'bg-[#a4c6d7] hover:bg-[#8fb5c9] text-white'
             }`}>
             {isGenerating
               ? 'Generating Questions...'
@@ -248,9 +253,9 @@ export const InputPage = () => {
 
           {showQuestions && questions.length > 0 && (
             <div className='mt-8 pt-8 border-t border-gray-200'>
-              <h2 className='text-2xl font-semibold text-gray-800 mb-6'>
+              <h3 className='text-2xl font-bold text-gray-900 mb-6'>
                 Generated Interview Questions
-              </h2>
+              </h3>
               <div className='space-y-4'>
                 {questions.map((question, index) => (
                   <QuestionCard key={index} question={question} index={index} />
@@ -261,8 +266,8 @@ export const InputPage = () => {
                 disabled={isGeneratingPost}
                 className={`mt-6 w-full py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center ${
                   isGeneratingPost
-                    ? 'bg-gray-400 cursor-not-allowed text-white'
-                    : 'bg-green-600 hover:bg-green-700 text-white'
+                    ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+                    : 'bg-[#a4c6d7] hover:bg-[#8fb5c9] text-white'
                 }`}>
                 {isGeneratingPost ? (
                   <>

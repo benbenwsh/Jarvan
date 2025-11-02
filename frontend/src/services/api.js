@@ -61,3 +61,25 @@ export const updatePostDescription = async (description) => {
   }
   return response.json();
 };
+
+/**
+ * Upload image and caption to Instagram
+ * @param {string} imageUrl - The URL of the image to upload
+ * @param {string} caption - The caption for the Instagram post
+ * @returns {Promise<{success: boolean, message: string}>}
+ */
+export const uploadToInstagram = async (imageUrl, caption) => {
+  const response = await fetch(`${API_BASE_URL}/instagramUpload`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ imageUrl, caption }),
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to upload to Instagram');
+  }
+  
+  return response.json();
+};
