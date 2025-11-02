@@ -7,6 +7,7 @@ import pitchRoutes from './routes/pitch.js';
 import postRoutes from './routes/post.js';
 import companyRoutes from './routes/company.js';
 import chatbotRoutes from './routes/chatbot.js';
+import analyticsRoutes from './routes/analytics.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,6 +26,7 @@ app.use('/api/pitch', pitchRoutes);
 app.use('/api/pitch', postRoutes);
 app.use('/api/company', companyRoutes);
 app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
