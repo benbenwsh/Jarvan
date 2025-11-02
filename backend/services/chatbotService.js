@@ -99,14 +99,8 @@ Conversation Guidelines:
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
-        {
-          role: 'system',
-          content: systemPrompt,
-        },
-        {
-          role: 'user',
-          content: userPrompt,
-        },
+        {role: 'system', content: systemPrompt},
+        {role: 'user', content: userPrompt},
       ],
       temperature: 0.8,
       max_tokens: 200,
@@ -120,9 +114,7 @@ Conversation Guidelines:
 
     return chatbotMessage;
   } catch (error) {
-    if (error instanceof Error) {
-      throw error;
-    }
+    if (error instanceof Error) throw error;
     throw new Error(`OpenAI API error: ${error.message || 'Unknown error'}`);
   }
 }
