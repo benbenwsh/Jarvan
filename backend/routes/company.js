@@ -1,5 +1,6 @@
 import express from 'express';
 import {saveCompanyAndQuestions} from '../services/companyService.js';
+import {getSupabaseClient} from '../services/supabase.js';
 
 const router = express.Router();
 
@@ -55,6 +56,33 @@ router.post('/save', async (req, res, next) => {
     });
   } catch (error) {
     console.error('Error saving company data:', error);
+    next(error);
+  }
+});
+
+/**
+ * GET /api/company/list
+ * Get all companies with id and name
+ * Response: { companies: Array<{id: string, name: string}> }
+ */
+router.get('/list', async (req, res, next) => {
+  try {
+    const supabase = getSupabaseClient();
+
+    const {data: companies, error} = await supabase
+      .from('companies')
+      .select('id, name')
+      .order('name', {ascending: true});
+
+    if (error) {
+      throw new Error(`Failed to get companies: ${error.message}`);
+    }
+
+    res.json({
+      companies: companies || [],
+    });
+  } catch (error) {
+    console.error('Error getting company list:', error);
     next(error);
   }
 });

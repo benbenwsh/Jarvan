@@ -2,6 +2,7 @@ import express from 'express';
 import {
   createCustomer,
   getCompanyData,
+  getCustomerCompanyId,
   saveMessage,
   getCustomerMessages,
   getNextMessageOrder,
@@ -13,12 +14,12 @@ const router = express.Router();
 /**
  * POST /api/chatbot/create-customer
  * Create a new customer
- * Request body: { name: string, email: string }
+ * Request body: { name: string, email: string, companyId: string }
  * Response: { customerId: string }
  */
 router.post('/create-customer', async (req, res, next) => {
   try {
-    const {name, email} = req.body;
+    const {name, email, companyId} = req.body;
 
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
       return res.status(400).json({
@@ -32,6 +33,12 @@ router.post('/create-customer', async (req, res, next) => {
       });
     }
 
+    if (!companyId || typeof companyId !== 'string') {
+      return res.status(400).json({
+        error: 'Company ID is required',
+      });
+    }
+
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
@@ -40,7 +47,7 @@ router.post('/create-customer', async (req, res, next) => {
       });
     }
 
-    const result = await createCustomer(name.trim(), email.trim());
+    const result = await createCustomer(name.trim(), email.trim(), companyId);
 
     res.json({
       customerId: result.customerId,
@@ -54,11 +61,27 @@ router.post('/create-customer', async (req, res, next) => {
 /**
  * GET /api/chatbot/company-data
  * Get company pitch and questions
+ * Query params: companyId (optional) or customerId (optional)
  * Response: { pitch: string, questions: Array<{id: number, question: string}> }
  */
 router.get('/company-data', async (req, res, next) => {
   try {
-    const companyData = await getCompanyData();
+    const {companyId, customerId} = req.query;
+
+    let targetCompanyId = companyId;
+
+    // If companyId not provided, try to get from customerId
+    if (!targetCompanyId && customerId) {
+      targetCompanyId = await getCustomerCompanyId(customerId);
+    }
+
+    if (!targetCompanyId) {
+      return res.status(400).json({
+        error: 'Company ID or Customer ID is required',
+      });
+    }
+
+    const companyData = await getCompanyData(targetCompanyId);
     res.json(companyData);
   } catch (error) {
     console.error('Error getting company data:', error);
@@ -115,8 +138,11 @@ router.post('/message', async (req, res, next) => {
       });
     }
 
+    // Get customer's company_id
+    const companyId = await getCustomerCompanyId(customerId);
+
     // Get company data
-    const companyData = await getCompanyData();
+    const companyData = await getCompanyData(companyId);
 
     // Get existing messages for context
     const existingMessages = await getCustomerMessages(customerId);
@@ -169,8 +195,11 @@ router.post('/initiate', async (req, res, next) => {
       });
     }
 
+    // Get customer's company_id
+    const companyId = await getCustomerCompanyId(customerId);
+
     // Get company data
-    const companyData = await getCompanyData();
+    const companyData = await getCompanyData(companyId);
 
     // Get existing messages
     const messages = await getCustomerMessages(customerId);
