@@ -14,6 +14,7 @@ export const InputPage = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingPost, setIsGeneratingPost] = useState(false);
   const [questions, setQuestions] = useState([]);
+  const [newQuestion, setNewQuestion] = useState('');
   const [error, setError] = useState(null);
   const [showQuestions, setShowQuestions] = useState(false);
 
@@ -77,10 +78,23 @@ export const InputPage = () => {
     }
   };
 
+  const handleRemoveQuestion = (indexToRemove) => {
+    setQuestions(questions.filter((_, index) => index !== indexToRemove));
+  };
+
+  const handleAddQuestion = () => {
+    if (newQuestion.trim()) {
+      setQuestions([...questions, newQuestion.trim()]);
+      setNewQuestion('');
+    }
+  };
+
   const handleConfirmQuestions = async () => {
     // Save company and questions to Supabase, then generate Instagram post
     setIsGeneratingPost(true);
     setError(null);
+
+    console.log('Questions being sent:', questions);
 
     try {
       // Step 1: Save company and questions to Supabase
@@ -295,9 +309,49 @@ export const InputPage = () => {
               </div>
               <div className='space-y-4'>
                 {questions.map((question, index) => (
-                  <QuestionCard key={index} question={question} index={index} />
+                  <div key={index} className='relative group'>
+                    <QuestionCard question={question} index={index} />
+                    <button
+                      onClick={() => handleRemoveQuestion(index)}
+                      className='absolute top-2 right-2 p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md'
+                      title='Remove question'>
+                      <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
+                      </svg>
+                    </button>
+                  </div>
                 ))}
               </div>
+
+              {/* Add new question input */}
+              <div className='mt-6 p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300'>
+                <label className='block text-sm font-semibold text-gray-900 mb-2'>
+                  Add Custom Question
+                </label>
+                <div className='flex gap-2'>
+                  <input
+                    type='text'
+                    value={newQuestion}
+                    onChange={(e) => setNewQuestion(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleAddQuestion()}
+                    placeholder='Enter a custom question...'
+                    className='flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-[#a4c6d7] focus:border-[#a4c6d7] bg-white'
+                  />
+                  <button
+                    onClick={handleAddQuestion}
+                    disabled={!newQuestion.trim()}
+                    className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
+                      newQuestion.trim()
+                        ? 'bg-gradient-to-r from-[#a4c6d7] to-[#8fb5c9] hover:from-[#8fb5c9] hover:to-[#7aa4b8] text-white shadow-md hover:shadow-lg'
+                        : 'bg-gray-300 cursor-not-allowed text-gray-500'
+                    }`}>
+                    <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 4v16m8-8H4' />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
               <button
                 onClick={handleConfirmQuestions}
                 disabled={isGeneratingPost}
