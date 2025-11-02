@@ -6,6 +6,7 @@ import cors from 'cors';
 import pitchRoutes from './routes/pitch.js';
 import postRoutes from './routes/post.js';
 import companyRoutes from './routes/company.js';
+import chatbotRoutes from './routes/chatbot.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,6 +24,7 @@ app.get('/health', (req, res) => {
 app.use('/api/pitch', pitchRoutes);
 app.use('/api/pitch', postRoutes);
 app.use('/api/company', companyRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
