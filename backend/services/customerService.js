@@ -1,19 +1,22 @@
 import {getSupabaseClient} from './supabase.js';
 import {randomUUID} from 'crypto';
 
-const COMPANY_ID = 'e9d1ef02-8582-4173-9d2d-29a7f0661353';
-
 /**
  * Create a new customer
  * @param {string} name - Customer name
  * @param {string} email - Customer email
+ * @param {string} companyId - Company ID
  * @returns {Promise<{customerId: string}>}
  */
-export async function createCustomer(name, email) {
+export async function createCustomer(name, email, companyId) {
   const supabase = getSupabaseClient();
 
   if (!name || !email) {
     throw new Error('Name and email are required');
+  }
+
+  if (!companyId) {
+    throw new Error('Company ID is required');
   }
 
   const customerId = randomUUID();
@@ -23,7 +26,7 @@ export async function createCustomer(name, email) {
       id: customerId,
       name: name.trim(),
       email: email.trim(),
-      company_id: COMPANY_ID,
+      company_id: companyId,
     });
 
     if (error) {
@@ -41,18 +44,59 @@ export async function createCustomer(name, email) {
 }
 
 /**
+ * Get customer's company_id
+ * @param {string} customerId - Customer ID
+ * @returns {Promise<string>} Company ID
+ */
+export async function getCustomerCompanyId(customerId) {
+  const supabase = getSupabaseClient();
+
+  if (!customerId) {
+    throw new Error('Customer ID is required');
+  }
+
+  try {
+    const {data: customer, error} = await supabase
+      .from('customers')
+      .select('company_id')
+      .eq('id', customerId)
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to get customer: ${error.message}`);
+    }
+
+    if (!customer) {
+      throw new Error('Customer not found');
+    }
+
+    return customer.company_id;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(`Database error: ${error.message || 'Unknown error'}`);
+  }
+}
+
+/**
  * Get company data (pitch and questions)
+ * @param {string} companyId - Company ID
  * @returns {Promise<{pitch: string, questions: Array<{id: number, question: string}>}>}
  */
-export async function getCompanyData() {
+export async function getCompanyData(companyId) {
   const supabase = getSupabaseClient();
+
+  if (!companyId) {
+    throw new Error('Company ID is required');
+  }
 
   try {
     // Get company
     const {data: company, error: companyError} = await supabase
       .from('companies')
       .select('business_pitch')
-      .eq('id', COMPANY_ID)
+      .eq('id', companyId)
       .single();
 
     if (companyError) {
@@ -67,7 +111,7 @@ export async function getCompanyData() {
     const {data: questions, error: questionsError} = await supabase
       .from('questions')
       .select('id, question')
-      .eq('company_id', COMPANY_ID)
+      .eq('company_id', companyId)
       .order('id', {ascending: true});
 
     if (questionsError) {

@@ -1,11 +1,36 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 
 export const AnalyticsPage = () => {
+  const [companies, setCompanies] = useState([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [analytics, setAnalytics] = useState(null);
 
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const response = await fetch('/api/company/list');
+        if (!response.ok) {
+          throw new Error('Failed to fetch companies');
+        }
+        const data = await response.json();
+        setCompanies(data.companies || []);
+      } catch (err) {
+        console.error('Error fetching companies:', err);
+        setError('Failed to load companies. Please refresh the page.');
+      }
+    };
+
+    fetchCompanies();
+  }, []);
+
   const handleAnalyze = async () => {
+    if (!selectedCompanyId) {
+      setError('Please select a company');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setAnalytics(null);
@@ -16,6 +41,9 @@ export const AnalyticsPage = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          companyId: selectedCompanyId,
+        }),
       });
 
       if (!response.ok) {
@@ -51,40 +79,80 @@ export const AnalyticsPage = () => {
           )}
 
           {!analytics && (
-            <div className='text-center'>
-              <button
-                onClick={handleAnalyze}
-                disabled={loading}
-                className={`px-8 py-4 rounded-lg font-semibold text-lg transition-colors ${
-                  loading
-                    ? 'bg-gray-400 cursor-not-allowed text-white'
-                    : 'bg-blue-600 hover:bg-blue-700 text-white'
-                }`}>
-                {loading ? (
-                  <>
+            <div className='space-y-6'>
+              <div>
+                <label
+                  htmlFor='company'
+                  className='block text-sm font-semibold text-gray-800 mb-2'>
+                  Select Company
+                </label>
+                <div className='relative'>
+                  <select
+                    id='company'
+                    value={selectedCompanyId}
+                    onChange={(e) => setSelectedCompanyId(e.target.value)}
+                    disabled={loading}
+                    className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed transition-all duration-200 bg-white appearance-none cursor-pointer'
+                    required>
+                    <option value=''>Select a company</option>
+                    {companies.map((company) => (
+                      <option key={company.id} value={company.id}>
+                        {company.name}
+                      </option>
+                    ))}
+                  </select>
+                  <div className='absolute inset-y-0 right-3 flex items-center pointer-events-none'>
                     <svg
-                      className='animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block'
-                      xmlns='http://www.w3.org/2000/svg'
+                      className='w-5 h-5 text-gray-400'
                       fill='none'
+                      stroke='currentColor'
                       viewBox='0 0 24 24'>
-                      <circle
-                        className='opacity-25'
-                        cx='12'
-                        cy='12'
-                        r='10'
-                        stroke='currentColor'
-                        strokeWidth='4'></circle>
                       <path
-                        className='opacity-75'
-                        fill='currentColor'
-                        d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M19 9l-7 7-7-7'
+                      />
                     </svg>
-                    Analyzing...
-                  </>
-                ) : (
-                  'Start Analysis'
-                )}
-              </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className='text-center'>
+                <button
+                  onClick={handleAnalyze}
+                  disabled={loading || !selectedCompanyId}
+                  className={`px-8 py-4 rounded-lg font-semibold text-lg transition-colors ${
+                    loading || !selectedCompanyId
+                      ? 'bg-gray-400 cursor-not-allowed text-white'
+                      : 'bg-blue-600 hover:bg-blue-700 text-white'
+                  }`}>
+                  {loading ? (
+                    <>
+                      <svg
+                        className='animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block'
+                        xmlns='http://www.w3.org/2000/svg'
+                        fill='none'
+                        viewBox='0 0 24 24'>
+                        <circle
+                          className='opacity-25'
+                          cx='12'
+                          cy='12'
+                          r='10'
+                          stroke='currentColor'
+                          strokeWidth='4'></circle>
+                        <path
+                          className='opacity-75'
+                          fill='currentColor'
+                          d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
+                      </svg>
+                      Analyzing...
+                    </>
+                  ) : (
+                    'Start Analysis'
+                  )}
+                </button>
+              </div>
             </div>
           )}
 

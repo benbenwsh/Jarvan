@@ -1,8 +1,6 @@
 import {getSupabaseClient} from './supabase.js';
 import OpenAI from 'openai';
 
-const COMPANY_ID = 'e9d1ef02-8582-4173-9d2d-29a7f0661353';
-
 /**
  * Get OpenAI client instance
  */
@@ -19,17 +17,22 @@ function getOpenAIClient() {
 
 /**
  * Get all company data including pitch, customers, and messages
+ * @param {string} companyId - Company ID
  * @returns {Promise<{pitch: string, customers: Array, messagesByCustomer: Object}>}
  */
-export async function getAllCompanyData() {
+export async function getAllCompanyData(companyId) {
   const supabase = getSupabaseClient();
+
+  if (!companyId) {
+    throw new Error('Company ID is required');
+  }
 
   try {
     // Get company pitch
     const {data: company, error: companyError} = await supabase
       .from('companies')
       .select('business_pitch')
-      .eq('id', COMPANY_ID)
+      .eq('id', companyId)
       .single();
 
     if (companyError) {
@@ -44,7 +47,7 @@ export async function getAllCompanyData() {
     const {data: customers, error: customersError} = await supabase
       .from('customers')
       .select('id, name, email')
-      .eq('company_id', COMPANY_ID);
+      .eq('company_id', companyId);
 
     if (customersError) {
       throw new Error(`Failed to get customers: ${customersError.message}`);
